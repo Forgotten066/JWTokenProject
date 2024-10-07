@@ -2,6 +2,7 @@ import os
 import configparser
 from pathlib import Path
 from string import ascii_lowercase, digits
+from datetime import timedelta
 
 from .conf.config import *
 from .conf.database import *
@@ -22,6 +23,7 @@ try:
 except IOError:
     try:
         from django.utils.crypto import get_random_string
+        from datetime import timedelta
 
         chars = ascii_lowercase + digits + '!@#$%^&*()-_=+'
         SECRET_KEY = get_random_string(50, chars)
@@ -40,8 +42,11 @@ ALLOWED_HOSTS = ["*"]
 INSTALLED_APPS = [
     'rest_framework',
     # 'rest_framework.authtoken',
-
+    'rest_framework_simplejwt',
+    'djoser',
     'drf_yasg',
+    'apps.main',
+
 
 ] + DEFAULT_INSTALLED_APPS
 
@@ -49,6 +54,31 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
 
 ] + DEFAULT_MIDDLEWARE
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',)
+    }
+
+
+DJOSER = {
+    'LOGIN_FIELD': 'username',
+    'TOKEN_MODEL': 'rest_framework_simplejwt.token_blacklist.models.BlacklistedToken',
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+
+    'UPDATE_LAST_LOGIN': True,
+
+    'ALGORITM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
 
 
 ROOT_URLCONF = 'core.urls'
